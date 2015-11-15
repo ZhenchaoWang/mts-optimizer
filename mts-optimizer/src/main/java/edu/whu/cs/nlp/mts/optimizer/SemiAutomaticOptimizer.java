@@ -37,11 +37,11 @@ public class SemiAutomaticOptimizer {
         File file = new File(topicDir);
         File[] summaryFiles = file.listFiles();
 
-        File destFile = new File(rougeDir + "/peers/" + filename);
+        File destFile = new File(rougeDir + "/peers/" + filename + ".3");
 
         for (int i = 0; i < summaryFiles.length; i++) {
 
-            File summary = summaryFiles[1];
+            File summary = summaryFiles[i];
 
             log.info("[" + (i + 1) + "/" + summaryFiles.length + "]Processing file: " + summary.getAbsolutePath());
 
@@ -52,7 +52,7 @@ public class SemiAutomaticOptimizer {
 
                 log.info("Copy summaryfile[" + summary.getName() + "] to peer dir!");
 
-                FileUtils.copyFileToDirectory(summary, destFile);
+                FileUtils.copyFile(summary, destFile);
 
             } catch (IOException e) {
 
@@ -71,15 +71,18 @@ public class SemiAutomaticOptimizer {
             }
 
             // 执行rouge评测
-            String commond = "perl ROUGE-1.5.5.pl -e /home/eventChain/rouge_eval/data"
+            /*String commond = "perl ROUGE-1.5.5.pl -e /home/eventChain/rouge_eval/data"
                     + " -a -n 2 -x -m -2 4 -u -c 95 -r 1000 -f A -p 0.5 -t 0"
                     + " -d /home/eventChain/rouge_eval/rougejk.in"
                     + " > /home/eventChain/rouge_eval/scores.out";
 
-            String[] commond_rouge = {"/bin/sh", "-c", commond};
+            String[] commond_rouge = {"/bin/sh", "-c", commond};*/
+
+            String commond = "bash /home/eventChain/rouge_eval/run_eval.sh";
 
             try {
-                Process process = Runtime.getRuntime().exec(commond_rouge);
+                //Process process = Runtime.getRuntime().exec(commond_rouge);
+                Process process = Runtime.getRuntime().exec(commond);
                 String errMsg = SemiAutomaticOptimizer.execStreamProcess(process.getErrorStream());
                 String outMsg = SemiAutomaticOptimizer.execStreamProcess(process.getInputStream());
 
@@ -142,7 +145,7 @@ public class SemiAutomaticOptimizer {
                 log.error("[" + file.getName() + "]The rouge-1 mathced elements is " + count + ", not 4!");
                 continue;
             }
-            sbResults.append(file.getName() + "\tROUGE-1\tR:" + rVal / 4.0f + "\tP:" + pVal / 4.0f + "\tF:" + fVal / 4.0f);
+            sbResults.append(summary.getName() + "\tROUGE-1\tR:" + rVal / 4.0f + "\tP:" + pVal / 4.0f + "\tF:" + fVal / 4.0f);
 
             // Rouge-2
             String regex_rouge_2 = "3 ROUGE-2 Eval " + filename + "-[A-J].3 R:([0-9\\.]+) P:([0-9\\.]+) F:([0-9\\.]+)";
